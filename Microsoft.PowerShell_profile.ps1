@@ -1,3 +1,52 @@
+# ============================================================
+#  NAVIGATION
+# ============================================================
+
+function gt-desktop   { Set-Location "C:\Users\VladimirGromes\Desktop" }
+function gt-onedrive  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC" }
+function gt-projects  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\projects" }
+function gt-dev       { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev" }
+function gt-git       { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev\git" }
+function gt-decipher  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\decipher" }
+
+
+# open with n++
+function npp { & "C:\Program Files\Notepad++\notepad++.exe" @args }
+
+# Linux-style touch — creates file if it doesn't exist, updates timestamp if it does
+function touch ($file) {
+    if (Test-Path $file) { (Get-Item $file).LastWriteTime = Get-Date }
+    else                 { New-Item -ItemType File -Path $file | Out-Null }
+}
+
+# which — find where a command/executable lives
+function which ($cmd) {
+    Get-Command $cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+}
+
+# grep — search text in files or piped input
+function grep ($pattern, $path) {
+    if ($path) { Get-ChildItem $path -Recurse -File | Select-String -Pattern $pattern }
+    else       { $input | Select-String -Pattern $pattern }
+}
+
+# findtext — recursive content search from current dir
+function findtext ($text) {
+    Get-ChildItem -Recurse -File | Select-String -Pattern $text
+}
+
+# here — open current folder in Explorer
+function here { explorer . }
+
+# editconf — open profile in Notepad
+function editconf { notepad $PROFILE }
+
+# reload — re-source profile without restarting terminal
+function reload {
+    . $PROFILE
+    Write-Host "Profile reloaded!" -ForegroundColor DarkGreen
+}
+
 # =============================================================================
 #  PowerShell 7 Profile — Colorful prompt, no third-party tools required
 #  (no Oh My Posh, no modules to install)
@@ -228,13 +277,13 @@ function Write-ColorDir {
     }
 }
 
-# Remove the built-in dir/ls aliases so our functions take priority.
-# Without this, PowerShell keeps the built-in aliases and ignores our functions.
+Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
+function dirs { Write-ColorDir @args }   # dirs → colored listing
+function ls   { Write-ColorDir @args }   # ls   → colored listing
+Set-Alias ll Write-ColorDir              # ll   → colored listing
+
 Remove-Item Alias:dir -Force -ErrorAction SilentlyContinue
-Remove-Item Alias:ls  -Force -ErrorAction SilentlyContinue
-function dir { Write-ColorDir @args }   # dir  →  colored listing
-function ls  { Write-ColorDir @args }   # ls   →  colored listing
-Set-Alias ll Write-ColorDir             # ll   →  colored listing
+function dir { Write-ColorDir @args }
 
 
 # =============================================================================
