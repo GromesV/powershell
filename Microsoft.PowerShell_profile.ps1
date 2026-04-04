@@ -2,6 +2,36 @@
 #  NAVIGATION
 # ============================================================
 
+
+# for tui install Install-Module -Name Microsoft.PowerShell.ConsoleGuiTools -Scope CurrentUser -Force
+
+function gt-pajtoni {
+    param([string]$Name)
+
+    $BasePath = "D:/programiranje/pajtoni"
+
+    # Get all matching folders
+    $matches = Get-ChildItem -Path $BasePath -Directory | 
+               Where-Object { $_.Name -like "*$Name*" }
+
+    if ($matches.Count -eq 0) {
+        Write-Warning "No project found containing '$Name'"
+    } 
+    elseif ($matches.Count -eq 1) {
+        Set-Location $matches.FullName
+    } 
+    else {
+        # This creates the terminal-based dropdown
+        $selection = $matches | 
+                     Select-Object Name, FullName | 
+                     Out-ConsoleGridView -Title "Select Project" -OutputMode Single
+        
+        if ($selection) {
+            Set-Location $selection.FullName
+        }
+    }
+}
+
 function gt-desktop   { Set-Location "C:\Users\VladimirGromes\Desktop" }
 function gt-onedrive  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC" }
 function gt-projects  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\projects" }
@@ -176,7 +206,7 @@ function prompt {
     $time  = Get-Date -Format "HH:mm:ss"
 
     # Assemble line 1: each segment is <color><text><reset>
-    $line1 = "${C_USER}${user}${RESET}${C_AT}@${RESET}${C_HOST}${hname}${RESET}  ${C_PATH}${path}${RESET}${git}  ${C_TIME}${time}${RESET}"
+    $line1 = "${C_PATH}${path}${RESET}${git}  ${C_TIME}${time}${RESET}"
 
     # >> symbol: green on success, red on failure
     $symbol = if ($lastOk) { "${C_OK}>>${RESET}" } else { "${C_FAIL}>>${RESET}" }
