@@ -69,3 +69,28 @@ To restore your look on a new machine, just copy your backed-up `settings.json` 
 | Change prompt colors        | Edit the `$C_USER`, `$C_PATH` etc. variables     |
 | Change folder color in dir  | Edit `$C_DIR` RGB values in `Write-ColorDir`     |
 | Test a color without saving | See the test command inside the profile comments |
+
+## POWERSHELL 7 in terminal VSCODE
+
+
+Step 1: Find the actual path
+Run this command in your current VS Code terminal:
+
+PowerShell
+`where.exe pwsh`
+
+Add this to settings.json for vscode.
+
+
+```json
+
+"terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "path": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "icon": "terminal-powershell",
+            "args": ["-ExecutionPolicy", "Bypass"]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+```

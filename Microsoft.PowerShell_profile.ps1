@@ -296,6 +296,14 @@ if ($prl) {
 }
 
 
+# simple vscode task example
+function Confirm-Task {
+    Write-Host "---------------------------" -ForegroundColor Cyan
+    Write-Host "Task Done!" -ForegroundColor Green
+    Write-Host "---------------------------" -ForegroundColor Cyan
+}
+
+
 # =============================================================================
 #  STARTUP MESSAGE
 #  Shown once when the terminal opens and the profile loads.
