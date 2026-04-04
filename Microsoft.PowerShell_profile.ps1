@@ -375,12 +375,77 @@ if ($prl) {
 }
 
 
+
+# powershell# Set your API key once per session (or add to your profile)
+# $env:SURVEY_API_KEY = "your_api_key_here"
+
+# # Run the function
+# Get-SurveyData -Server "your.server.com" -Survey "12345"
+# Key points:
+
+# API key is read from $env:SURVEY_API_KEY — set it once and reuse
+# -Server should be just the hostname (no https://), the function builds the full URL
+# The extracted file is found by matching any file named {survey}.* (excluding .zip) after extraction
+# Excel is opened via Start-Process so the script doesn't block
+
 # simple vscode task example
-function Confirm-Task {
-    Write-Host "---------------------------" -ForegroundColor Cyan
-    Write-Host "Task Done!" -ForegroundColor Green
-    Write-Host "---------------------------" -ForegroundColor Cyan
+function Get-SurveyData {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Server,
+
+        [Parameter(Mandatory=$true)]
+        [string]$Survey
+    )
+
+    # Read API key from environment variable
+    $ApiKey = $env:SURVEY_API_KEY
+    if (-not $ApiKey) {
+        Write-Host "Error: SURVEY_API_KEY environment variable is not set." -ForegroundColor Red
+        return
+    }
+
+    $Url = "https://$Server/api/v1/surveys/$Survey/data?format=json"
+    $ZipFile = "$Survey.zip"
+    $OutputDir = Split-Path -Parent $ZipFile
+    if (-not $OutputDir) { $OutputDir = "." }
+
+    Write-Host "Fetching survey data from: $Url" -ForegroundColor Cyan
+
+    # Download the zip file
+    try {
+        Invoke-WebRequest -Uri $Url -Headers @{ "x-apikey" = $ApiKey } -Method GET -OutFile $ZipFile
+        Write-Host "Downloaded: $ZipFile" -ForegroundColor Green
+    } catch {
+        Write-Host "Error downloading data: $_" -ForegroundColor Red
+        return
+    }
+
+    # Unzip the file
+    try {
+        Expand-Archive -Path $ZipFile -DestinationPath $OutputDir -Force
+        Write-Host "Unzipped to: $OutputDir" -ForegroundColor Green
+    } catch {
+        Write-Host "Error unzipping file: $_" -ForegroundColor Red
+        return
+    }
+
+    # Delete the zip file
+    Remove-Item -Path $ZipFile -Force
+    Write-Host "Deleted zip: $ZipFile" -ForegroundColor Yellow
+
+    # Open the extracted file in Excel (assumes extracted file matches survey name)
+    $ExtractedFile = Get-ChildItem -Path $OutputDir | Where-Object { $_.Name -like "$Survey.*" -and $_.Extension -ne ".zip" } | Select-Object -First 1
+    if ($ExtractedFile) {
+        Write-Host "Opening in Excel: $($ExtractedFile.FullName)" -ForegroundColor Cyan
+        Start-Process excel.exe $ExtractedFile.FullName
+    } else {
+        Write-Host "Warning: Could not find extracted file matching survey '$Survey'." -ForegroundColor Yellow
+    }
+
+    Confirm-Task
 }
+
 
 
 # =============================================================================

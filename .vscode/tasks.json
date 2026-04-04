@@ -2,22 +2,43 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run My Done Command",
+            "label": "Get Survey Data",
             "type": "shell",
-            "command": "Confirm-Task",
-            "problemMatcher": [],
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/Get-SurveyData.ps1",
+                "-Server",
+                "${input:server}",
+                "-Survey",
+                "${input:survey}"
+            ],
             "presentation": {
-                "echo": true,
                 "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": true
+                "panel": "new"
             },
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            }
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "server",
+            "type": "pickString",
+            "description": "Select server",
+            "options": [
+                "prod.yourserver.com",
+                "staging.yourserver.com",
+                "dev.yourserver.com"
+            ],
+            "default": "prod.yourserver.com"
+        },
+        {
+            "id": "survey",
+            "type": "promptString",
+            "description": "Enter Survey ID (number)",
+            "default": "12345"
         }
     ]
 }
