@@ -99,7 +99,7 @@ function here
 
 # editconf — open profile in Notepad
 function editconf
-{ notepad $PROFILE 
+{ code $PROFILE 
 }
 
 # reload — re-source profile without restarting terminal

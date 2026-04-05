@@ -9,6 +9,7 @@ Colorful PowerShell 7 prompt and directory listing. No third-party tools require
 - **PowerShell 7** — download from https://github.com/PowerShell/PowerShell/releases/latest
   Pick the `PowerShell-7.x.x-win-x64.msi` file and run it.
 - **Windows Terminal** — get it from the Microsoft Store if you don't have it.
+- **TaskDeck** - extension for VS code
 
 ---
 
