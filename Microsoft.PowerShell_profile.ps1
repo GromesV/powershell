@@ -158,23 +158,17 @@ $RESET = "$ESC[0m"       # resets all colors and styles back to terminal default
 
 
 # =============================================================================
-#  PROMPT COLORS
-#  These control the two-line prompt shown before every command.
-#  All use 256-color palette (38;5;N = foreground text color).
-#
-#  TO CHANGE: swap the number N in 38;5;N
-#  TO PREVIEW: https://www.ditig.com/256-colors-cheat-sheet
+#  PROMPT COLORS (Optimized for Quiet Light Theme)
 # =============================================================================
 
-$C_USER  = "$ESC[38;5;213m"   # pink/violet  — your username
-$C_AT    = "$ESC[38;5;244m"   # grey         — the @ symbol between user and host
-$C_HOST  = "$ESC[38;5;81m"    # cyan-blue    — your computer name
-$C_PATH  = "$ESC[38;5;149m"   # lime green   — current directory path
-$C_GIT   = "$ESC[38;5;221m"   # amber        — git branch name
-$C_OK    = "$ESC[38;5;82m"    # bright green — >> prompt symbol when last command succeeded
-$C_FAIL  = "$ESC[38;5;196m"   # red          — >> prompt symbol when last command failed
-$C_TIME  = "$ESC[38;5;244m"   # grey         — timestamp (HH:mm:ss)
-
+$C_USER  = "$ESC[38;5;126m"   # Deep Magenta (Darker than Pink)
+$C_AT    = "$ESC[38;5;240m"   # Dark Charcoal Grey
+$C_HOST  = "$ESC[38;5;24m"    # Deep Navy/Steel Blue (Replaces Cyan)
+$C_PATH  = "$ESC[38;5;28m"    # Forest Green (Replaces Lime Green)
+$C_GIT   = "$ESC[38;5;130m"   # Burnt Orange/Brown (Replaces Amber)
+$C_OK    = "$ESC[38;5;22m"    # Dark Emerald Green (Replaces Bright Green)
+$C_FAIL  = "$ESC[38;5;124m"   # Deep Crimson (Replaces Bright Red)
+$C_TIME  = "$ESC[38;5;242m"   # Medium-Dark Grey
 
 # =============================================================================
 #  HELPER: Get-GitBranch
@@ -319,15 +313,25 @@ function Write-ColorDir
 
     $ESC = [char]27
 
-    # TRUE RGB colors — not affected by Gruvbox 77 palette remapping
-    # 38;2;R;G;B = foreground,  48;2;R;G;B = background
-    $C_DIR    = "$ESC[38;2;235;219;178m$ESC[48;2;56;98;83m"   # warm white text, dark teal background
+    # --- Optimized for Quiet Light ---
+    
+    # DIRECTORIES: White text on the Quiet Light Purple background (#705697)
+    # 38;2;255;255;255 = White Foreground
+    # 48;2;112;86;151   = Purple Background (matches your theme)
+    $C_DIR    = "$ESC[38;2;255;255;255m$ESC[48;2;112;86;151m"
 
-    # 256-color palette — affected by Gruvbox 77 remapping (fine for these)
-    $C_FILE   = "$ESC[38;5;223m"   # gruvbox fg1 warm beige  — regular files
-    $C_HIDDEN = "$ESC[38;5;240m"   # gruvbox dark4 grey      — hidden files and folders
-    $C_DATE   = "$ESC[38;5;246m"   # gruvbox grey            — date column
-    $C_SIZE   = "$ESC[38;5;108m"   # gruvbox aqua            — size column
+    # FILES: Dark Slate Grey (Deep contrast against light background)
+    $C_FILE   = "$ESC[38;5;236m" 
+
+    # HIDDEN: Light-Medium Grey (Dimmed but visible)
+    $C_HIDDEN = "$ESC[38;5;246m" 
+
+    # DATE: Muted Purple/Grey (Slightly lighter than foreground)
+    $C_DATE   = "$ESC[38;5;60m" 
+
+    # SIZE: Deep Teal (Adds a pop of color that is still dark)
+    $C_SIZE   = "$ESC[38;5;23m" 
+    
     $RESET    = "$ESC[0m"
 
     # -Force includes hidden files and system files in the listing
@@ -418,7 +422,7 @@ if ($prl)
     try
     {
         Set-PSReadLineOption -Colors @{
-            Command   = "`e[38;5;81m"    # cyan-blue  — cmdlet names, function names
+            Command = "`e[38;5;24m"    # Deep Navy Blue
             Parameter = "`e[38;5;149m"   # lime       — -ParameterName flags
             String    = "`e[38;5;221m"   # amber      — "quoted strings"
             Number    = "`e[38;5;213m"   # pink       — numeric literals (42, 3.14)
