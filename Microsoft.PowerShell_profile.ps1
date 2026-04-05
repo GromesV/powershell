@@ -5,74 +5,106 @@
 
 # for tui install Install-Module -Name Microsoft.PowerShell.ConsoleGuiTools -Scope CurrentUser -Force
 
-function gt-pajtoni {
+function gt-pajtoni
+{
     param([string]$Name)
 
     $BasePath = "D:/programiranje/pajtoni"
 
     # Get all matching folders
-    $matches = Get-ChildItem -Path $BasePath -Directory | 
-               Where-Object { $_.Name -like "*$Name*" }
+    $matchess = Get-ChildItem -Path $BasePath -Directory |
+        Where-Object { $_.Name -like "*$Name*" }
 
-    if ($matches.Count -eq 0) {
+    if ($matchess.Count -eq 0)
+    {
         Write-Warning "No project found containing '$Name'"
-    } 
-    elseif ($matches.Count -eq 1) {
-        Set-Location $matches.FullName
-    } 
-    else {
+    } elseif ($matchess.Count -eq 1)
+    {
+        Set-Location $matchess.FullName
+    } else
+    {
         # This creates the terminal-based dropdown
-        $selection = $matches | 
-                     Select-Object Name, FullName | 
-                     Out-ConsoleGridView -Title "Select Project" -OutputMode Single
-        
-        if ($selection) {
+        $selection = $matchess |
+            Select-Object Name, FullName |
+            Out-ConsoleGridView -Title "Select Project" -OutputMode Single
+
+        if ($selection)
+        {
             Set-Location $selection.FullName
         }
     }
 }
 
-function gt-desktop   { Set-Location "C:\Users\VladimirGromes\Desktop" }
-function gt-onedrive  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC" }
-function gt-projects  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\projects" }
-function gt-dev       { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev" }
-function gt-git       { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev\git" }
-function gt-decipher  { Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\decipher" }
+function gt-desktop
+{ Set-Location "C:\Users\VladimirGromes\Desktop" 
+}
+function gt-onedrive
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC" 
+}
+function gt-projects
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\projects" 
+}
+function gt-dev
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev" 
+}
+function gt-git
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev\git" 
+}
+function gt-decipher
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\decipher" 
+}
 
 
 # open with n++
-function npp { & "C:\Program Files\Notepad++\notepad++.exe" @args }
+function npp
+{ & "C:\Program Files\Notepad++\notepad++.exe" @args 
+}
 
 # Linux-style touch — creates file if it doesn't exist, updates timestamp if it does
-function touch ($file) {
-    if (Test-Path $file) { (Get-Item $file).LastWriteTime = Get-Date }
-    else                 { New-Item -ItemType File -Path $file | Out-Null }
+function touch ($file)
+{
+    if (Test-Path $file)
+    { (Get-Item $file).LastWriteTime = Get-Date 
+    } else
+    { New-Item -ItemType File -Path $file | Out-Null 
+    }
 }
 
 # which — find where a command/executable lives
-function which ($cmd) {
+function which ($cmd)
+{
     Get-Command $cmd -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
 }
 
 # grep — search text in files or piped input
-function grep ($pattern, $path) {
-    if ($path) { Get-ChildItem $path -Recurse -File | Select-String -Pattern $pattern }
-    else       { $input | Select-String -Pattern $pattern }
+function grep ($pattern, $path)
+{
+    if ($path)
+    { Get-ChildItem $path -Recurse -File | Select-String -Pattern $pattern 
+    } else
+    { $input | Select-String -Pattern $pattern 
+    }
 }
 
 # findtext — recursive content search from current dir
-function findtext ($text) {
+function findtext ($text)
+{
     Get-ChildItem -Recurse -File | Select-String -Pattern $text
 }
 
 # here — open current folder in Explorer
-function here { explorer . }
+function here
+{ explorer . 
+}
 
 # editconf — open profile in Notepad
-function editconf { notepad $PROFILE }
+function editconf
+{ notepad $PROFILE 
+}
 
 # reload — re-source profile without restarting terminal
-function reload {
+function reload
+{
     . $PROFILE
     Write-Host "Profile reloaded!" -ForegroundColor DarkGreen
 }
@@ -151,15 +183,20 @@ $C_TIME  = "$ESC[38;5;244m"   # grey         — timestamp (HH:mm:ss)
 #  Errors are silently ignored (git not installed, not a repo, etc.)
 # =============================================================================
 
-function Get-GitBranch {
-    try {
+function Get-GitBranch
+{
+    try
+    {
         # Ask git for the current branch name. 2>$null hides error output.
         $branch = git rev-parse --abbrev-ref HEAD 2>$null
-        if ($branch) {
+        if ($branch)
+        {
             # Returns:  " on <branchname>"  styled with colors
             return " $ESC[38;5;239mon$RESET $C_GIT$branch$RESET"
         }
-    } catch {}
+    } catch
+    {
+    }
     return ""   # not a git repo — return nothing, prompt stays clean
 }
 
@@ -172,9 +209,11 @@ function Get-GitBranch {
 #  Example:  C:\Users\Vlada\Documents\code  →  ~/Documents/code
 # =============================================================================
 
-function Get-ShortPath {
+function Get-ShortPath
+{
     $p = $PWD.Path
-    if ($p.StartsWith($HOME)) {
+    if ($p.StartsWith($HOME))
+    {
         $p = "~" + $p.Substring($HOME.Length)
     }
     $p -replace '\\', '/'   # convert Windows backslashes to forward slashes
@@ -194,13 +233,22 @@ function Get-ShortPath {
 #  TO CHANGE SYMBOL: edit the $symbol line below (currently >>).
 # =============================================================================
 
-function prompt {
+function prompt
+{
     # $? must be captured on the VERY FIRST LINE — any other statement resets it
     $lastOk = $?
 
     # Gather all pieces of the prompt
-    $user  = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }       # works on Windows and Unix
-    $hname = if ($env:COMPUTERNAME) { $env:COMPUTERNAME } else { hostname } # works on Windows and Unix
+    $user  = if ($env:USERNAME)
+    { $env:USERNAME 
+    } else
+    { $env:USER 
+    }       # works on Windows and Unix
+    $hname = if ($env:COMPUTERNAME)
+    { $env:COMPUTERNAME 
+    } else
+    { hostname 
+    } # works on Windows and Unix
     $path  = Get-ShortPath
     $git   = Get-GitBranch
     $time  = Get-Date -Format "HH:mm:ss"
@@ -209,7 +257,11 @@ function prompt {
     $line1 = "${C_PATH}${path}${RESET}${git}  ${C_TIME}${time}${RESET}"
 
     # >> symbol: green on success, red on failure
-    $symbol = if ($lastOk) { "${C_OK}>>${RESET}" } else { "${C_FAIL}>>${RESET}" }
+    $symbol = if ($lastOk)
+    { "${C_OK}>>${RESET}" 
+    } else
+    { "${C_FAIL}>>${RESET}" 
+    }
 
     Write-Host ""        # blank line above prompt for visual breathing room
     Write-Host $line1    # print line 1 (Write-Host renders ANSI codes correctly)
@@ -261,7 +313,8 @@ Set-Alias touch New-Item
 #    Edit the 38;5;N number in $C_FILE or $C_HIDDEN.
 # =============================================================================
 
-function Write-ColorDir {
+function Write-ColorDir
+{
     param([string]$Path = ".")
 
     $ESC = [char]27
@@ -280,27 +333,39 @@ function Write-ColorDir {
     # -Force includes hidden files and system files in the listing
     $items = Get-ChildItem -Path $Path -Force
 
-    foreach ($item in $items) {
+    foreach ($item in $items)
+    {
         # Check the Hidden attribute bit using bitwise AND
         $isHidden = $item.Attributes -band [System.IO.FileAttributes]::Hidden
         $isDir    = $item.PSIsContainer   # true = directory, false = file
 
         # Priority: hidden > directory > file
-        $nameColor = if ($isHidden)  { $C_HIDDEN }
-                     elseif ($isDir) { $C_DIR }
-                     else            { $C_FILE }
+        $nameColor = if ($isHidden)
+        { $C_HIDDEN 
+        } elseif ($isDir)
+        { $C_DIR 
+        } else
+        { $C_FILE 
+        }
 
         $date = $item.LastWriteTime.ToString("yyyy-MM-dd HH:mm")
 
         # Size: blank (7 spaces) for directories, human-readable for files
-        $size = if ($isDir) { "       " }
-                else {
-                    $b = $item.Length
-                    if     ($b -ge 1GB) { "{0,6:N1}G" -f ($b / 1GB) }
-                    elseif ($b -ge 1MB) { "{0,6:N1}M" -f ($b / 1MB) }
-                    elseif ($b -ge 1KB) { "{0,6:N1}K" -f ($b / 1KB) }
-                    else                { "{0,6}B"    -f $b }
-                }
+        $size = if ($isDir)
+        { "       " 
+        } else
+        {
+            $b = $item.Length
+            if     ($b -ge 1GB)
+            { "{0,6:N1}G" -f ($b / 1GB) 
+            } elseif ($b -ge 1MB)
+            { "{0,6:N1}M" -f ($b / 1MB) 
+            } elseif ($b -ge 1KB)
+            { "{0,6:N1}K" -f ($b / 1KB) 
+            } else
+            { "{0,6}B"    -f $b 
+            }
+        }
 
         # Print one row: date  size  name
         Write-Host "$C_DATE$date$RESET  $C_SIZE$size$RESET  $nameColor$($item.Name)$RESET"
@@ -308,12 +373,18 @@ function Write-ColorDir {
 }
 
 Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
-function dirs { Write-ColorDir @args }   # dirs → colored listing
-function ls   { Write-ColorDir @args }   # ls   → colored listing
+function dirs
+{ Write-ColorDir @args 
+}   # dirs → colored listing
+function ls
+{ Write-ColorDir @args 
+}   # ls   → colored listing
 Set-Alias ll Write-ColorDir              # ll   → colored listing
 
 Remove-Item Alias:dir -Force -ErrorAction SilentlyContinue
-function dir { Write-ColorDir @args }
+function dir
+{ Write-ColorDir @args 
+}
 
 
 # =============================================================================
@@ -336,14 +407,16 @@ function dir { Write-ColorDir @args }
 
 $prl = Get-Module -ListAvailable -Name PSReadLine | Sort-Object Version -Descending | Select-Object -First 1
 
-if ($prl) {
+if ($prl)
+{
     $prlVersion = $prl.Version
 
     # Windows editing mode: Home/End/Ctrl+Left/Right work as expected
     Set-PSReadLineOption -EditMode Windows
 
     # Syntax highlighting — works on all PSReadLine versions
-    try {
+    try
+    {
         Set-PSReadLineOption -Colors @{
             Command   = "`e[38;5;81m"    # cyan-blue  — cmdlet names, function names
             Parameter = "`e[38;5;149m"   # lime       — -ParameterName flags
@@ -354,19 +427,26 @@ if ($prl) {
             Keyword   = "`e[38;5;141m"   # lavender   — if, foreach, function, return, etc.
             Error     = "`e[38;5;196m"   # red        — syntax errors highlighted live
         }
-    } catch {}
+    } catch
+    {
+    }
 
     # History prediction — requires PSReadLine 2.1+
     # Suggests completions based on previously typed commands
-    if ($prlVersion -ge [Version]"2.1.0") {
+    if ($prlVersion -ge [Version]"2.1.0")
+    {
         Set-PSReadLineOption -PredictionSource History
 
         # ListView style + dim inline color — requires PSReadLine 2.2+
-        if ($prlVersion -ge [Version]"2.2.0") {
-            try {
+        if ($prlVersion -ge [Version]"2.2.0")
+        {
+            try
+            {
                 Set-PSReadLineOption -PredictionViewStyle ListView
                 Set-PSReadLineOption -Colors @{ InlinePrediction = "`e[38;5;238m" }   # dim grey
-            } catch {}
+            } catch
+            {
+            }
         }
     }
 
@@ -389,7 +469,8 @@ if ($prl) {
 # Excel is opened via Start-Process so the script doesn't block
 
 # simple vscode task example
-function Get-SurveyData {
+function Get-SurveyData
+{
     param(
         [Parameter(Mandatory=$true)]
         [string]$Server,
@@ -400,7 +481,8 @@ function Get-SurveyData {
 
     # Read API key from environment variable
     $ApiKey = $env:SURVEY_API_KEY
-    if (-not $ApiKey) {
+    if (-not $ApiKey)
+    {
         Write-Host "Error: SURVEY_API_KEY environment variable is not set." -ForegroundColor Red
         return
     }
@@ -408,24 +490,30 @@ function Get-SurveyData {
     $Url = "https://$Server/api/v1/surveys/$Survey/data?format=json"
     $ZipFile = "$Survey.zip"
     $OutputDir = Split-Path -Parent $ZipFile
-    if (-not $OutputDir) { $OutputDir = "." }
+    if (-not $OutputDir)
+    { $OutputDir = "." 
+    }
 
     Write-Host "Fetching survey data from: $Url" -ForegroundColor Cyan
 
     # Download the zip file
-    try {
+    try
+    {
         Invoke-WebRequest -Uri $Url -Headers @{ "x-apikey" = $ApiKey } -Method GET -OutFile $ZipFile
         Write-Host "Downloaded: $ZipFile" -ForegroundColor Green
-    } catch {
+    } catch
+    {
         Write-Host "Error downloading data: $_" -ForegroundColor Red
         return
     }
 
     # Unzip the file
-    try {
+    try
+    {
         Expand-Archive -Path $ZipFile -DestinationPath $OutputDir -Force
         Write-Host "Unzipped to: $OutputDir" -ForegroundColor Green
-    } catch {
+    } catch
+    {
         Write-Host "Error unzipping file: $_" -ForegroundColor Red
         return
     }
@@ -436,10 +524,12 @@ function Get-SurveyData {
 
     # Open the extracted file in Excel (assumes extracted file matches survey name)
     $ExtractedFile = Get-ChildItem -Path $OutputDir | Where-Object { $_.Name -like "$Survey.*" -and $_.Extension -ne ".zip" } | Select-Object -First 1
-    if ($ExtractedFile) {
+    if ($ExtractedFile)
+    {
         Write-Host "Opening in Excel: $($ExtractedFile.FullName)" -ForegroundColor Cyan
         Start-Process excel.exe $ExtractedFile.FullName
-    } else {
+    } else
+    {
         Write-Host "Warning: Could not find extracted file matching survey '$Survey'." -ForegroundColor Yellow
     }
 
