@@ -548,4 +548,3 @@ function Get-SurveyData
 #  Remove or edit this line if you don't want it.
 # =============================================================================
 
-Write-Host "`e[38;5;213mPowerShell $($PSVersionTable.PSVersion)$RESET  |  type ${C_PATH}help$RESET to get started`n"
