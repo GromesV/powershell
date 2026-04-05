@@ -472,14 +472,18 @@ if ($prl)
 function Get-SurveyData
 {
     param(
+
+        # FIXME: this should be hardcoded and its always decipher inc bla bla
         [Parameter(Mandatory=$true)]
         [string]$Server,
-
+        # FIXME: this should come from the parsed json. so from the location where this script is called we go up then to .vscode, then read settings json and obtain key decipherPath
+        # ../.vscode/settings.json -> read that as json and get value of decihpreProject key
         [Parameter(Mandatory=$true)]
         [string]$Survey
+        # FIXME: also i want to pass the statuses. so in the task i should have options such as qualified, terminated, all
     )
 
-    # Read API key from environment variable
+    # FIXME: Read API key from environment variable, check the real name of the variable
     $ApiKey = $env:SURVEY_API_KEY
     if (-not $ApiKey)
     {
