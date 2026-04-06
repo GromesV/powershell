@@ -4,8 +4,18 @@ Clipboard content to file.
 `gcb > data.json`
 
 
-Get current path to clipboard.
+Get current path to clipboard. 
 `gl|scb`
+
+Get info for Alias.
+`alias gl`
+
+Save filen in folder to txt.file.
+`(gci).Name > dir.txt`
+
+Open file in default opener program, lets say for xlsx it will be ecxel, for txt n++
+
+`ii filename.txt`
 
 
 ### Common Two-Letter Collisions
