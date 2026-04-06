@@ -19,6 +19,8 @@ We want to ensure these parts didn't get touched at all during translations.
 
 They can be moved inside the text field when it comes to position as in one language word can go somewhere else compared to english.
 
+
+
 1. html elements: all the html elements supported by forsta platform from their guide on the website docs
 1. pipe ` <title>[pipe: children_have] been to the zoo in the past 6 months?</title>`
 1. python code `${python code}`
