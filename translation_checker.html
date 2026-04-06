@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Translation Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface-alt: #f0efe9;
+    --border: rgba(0,0,0,0.09);
+    --border-med: rgba(0,0,0,0.15);
+    --text: #1a1916;
+    --text-muted: #6b6962;
+    --text-faint: #a09d97;
+    --accent: #1a1916;
+    --red: #c0392b;
+    --red-bg: #fdf2f1;
+    --red-border: #f5c6c2;
+    --blue: #1a4f8a;
+    --blue-bg: #f0f5fc;
+    --blue-border: #bdd0eb;
+    --green: #1a6645;
+    --green-bg: #f0faf5;
+    --green-border: #9fd4bc;
+    --amber: #8a4f0a;
+    --amber-bg: #fdf6ee;
+    --amber-border: #f0d4a8;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  html { font-size: 15px; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 820px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+
+  /* ── Header ── */
+  .page-header { margin-bottom: 2.5rem; }
+  .page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    margin-bottom: 0.25rem;
+  }
+  .page-header p { color: var(--text-muted); font-size: 0.9rem; }
+
+  /* ── Paste area ── */
+  .paste-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .paste-wrap { position: relative; }
+
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.65;
+    padding: 14px 16px;
+    border: 1px solid var(--border-med);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    resize: vertical;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text-faint); }
+
+  /* ── Controls ── */
+  .controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 8px 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-med);
+    cursor: pointer;
+    background: transparent;
+    color: var(--text);
+    transition: background 0.12s, border-color 0.12s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--surface-alt); }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .btn-primary:hover { background: #333; color: #fff; }
+
+  .btn-ghost {
+    border-color: transparent;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    padding: 8px 12px;
+  }
+  .btn-ghost:hover { background: var(--border); color: var(--text); }
+
+  /* ── Summary metrics ── */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 2rem 0 1.5rem;
+  }
+  @media (max-width: 600px) { .summary { grid-template-columns: repeat(2, 1fr); } }
+
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+  }
+  .metric-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .metric-value {
+    font-size: 1.75rem;
+    font-weight: 300;
+    font-family: 'DM Mono', monospace;
+    line-height: 1;
+  }
+  .metric-value.ok { color: var(--green); }
+  .metric-value.bad { color: var(--red); }
+
+  /* ── Filter row ── */
+  .filters { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-btn {
+    font-size: 0.78rem;
+    padding: 4px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border-med);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.12s;
+  }
+  .filter-btn:hover { background: var(--surface-alt); color: var(--text); }
+  .filter-btn.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  /* ── Issue list ── */
+  .issues-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+  .issue {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color 0.12s;
+  }
+  .issue:hover { border-color: var(--border-med); }
+
+  .issue-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .row-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    min-width: 44px;
+  }
+
+  .badge {
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 2px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge-untrans { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .badge-pattern { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+
+  .issue-summary { flex: 1; font-size: 0.85rem; color: var(--text-muted); }
+  .issue-qname {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chevron {
+    width: 14px; height: 14px;
+    color: var(--text-faint);
+    transition: transform 0.18s;
+    flex-shrink: 0;
+  }
+  .chevron svg { display: block; }
+  .issue.open .chevron { transform: rotate(90deg); }
+
+  /* ── Issue body ── */
+  .issue-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    padding: 14px 16px;
+  }
+  .issue.open .issue-body { display: block; }
+
+  .field-grid { display: grid; gap: 8px; margin-bottom: 14px; }
+  .field-row { display: grid; grid-template-columns: 100px 1fr; gap: 8px; align-start: start; }
+  .field-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    padding-top: 8px;
+    font-weight: 500;
+  }
+  .field-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 7px 10px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text);
+    line-height: 1.6;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  .pattern-block { margin-bottom: 10px; }
+  .pattern-name {
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  .token-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .token-label { font-size: 0.7rem; color: var(--text-faint); margin-right: 2px; }
+  .token {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    word-break: break-all;
+  }
+  .token-missing { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .token-added { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+
+  /* ── All good ── */
+  .all-ok {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    color: var(--green);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-faint);
+    font-size: 0.9rem;
+  }
+
+  /* ── Results hidden initially ── */
+  #results { display: none; }
+
+  /* ── Scrollbar ── */
+  .field-val::-webkit-scrollbar { width: 4px; }
+  .field-val::-webkit-scrollbar-track { background: transparent; }
+  .field-val::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="page-header">
+    <h1>Translation checker</h1>
+    <p>Paste TSV content from Excel. Detects untranslated rows and broken tokens.</p>
+  </header>
+
+  <label class="paste-label" for="input">Paste TSV (qname · english · translated)</label>
+  <div class="paste-wrap">
+    <textarea id="input" spellcheck="false" placeholder="qname&#9;english&#9;translated&#10;Q1&#9;How old are you?&#9;Wie alt sind Sie?&#10;Q2&#9;[pipe: name], where do you live?&#9;[pipe: name], wo wohnen Sie?"></textarea>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" onclick="run()">Check translations</button>
+    <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+    <button class="btn btn-ghost" onclick="loadExample()">Load example</button>
+  </div>
+
+  <div id="results">
+    <div class="summary" id="summary"></div>
+    <div class="filters" id="filters"></div>
+    <div class="issues-wrap" id="issues-list"></div>
+  </div>
+
+</div>
+
+<script>
+const PATTERNS = [
+  {
+    name: "HTML elements",
+    re: /<\/?(?:div|p|b|strong|u|a|i|em|img|span|br|ul|ol|li|h[1-6]|title|case|res|html)(?:\s[^>]*)?\/?>/gims
+  },
+  { name: "Pipe expression",   re: /\[pipe:[^\]]+\]/gims },
+  { name: "Python / template code", re: /\$\{[^}]+\}/gims },
+  { name: "Res element",       re: /\[res\s[^\]]+\]/gims },
+  { name: "Rel element",       re: /\[rel\s[^\]]+\]/gims },
+  { name: "Loopvar",           re: /\[loopvar:[^\]]+\]/gims },
+  { name: "Format modifier",   re: /\b(?:upper|lower|title|capitalize)\b/gims },
+];
+
+function extractTokens(text, re) {
+  const r = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+  return [...text.matchAll(r)].map(m => m[0]);
+}
+
+function multisetDiff(fromEng, fromTra) {
+  const counts = {};
+  for (const x of fromEng) counts[x] = (counts[x] || 0) + 1;
+  const missing = [];
+  for (const x of fromTra) {
+    if (counts[x] > 0) counts[x]--;
+    else missing.push(x);
+  }
+  const extra = Object.entries(counts).flatMap(([k, v]) => Array(v).fill(k));
+  return { missing, extra };
+}
+
+function parseTSV(raw) {
+  const lines = raw.trim().split(/\r?\n/);
+  return lines.slice(1).map((line, i) => {
+    const cols = line.split('\t');
+    return {
+      row: i + 2,
+      qname: (cols[0] || '').trim(),
+      english: cols[1] || '',
+      translated: cols[2] || ''
+    };
+  }).filter(r => (r.english || r.translated).trim());
+}
+
+let allIssues = [];
+let activeFilter = 'all';
+
+function run() {
+  const raw = document.getElementById('input').value.trim();
+  if (!raw) return;
+
+  const rows = parseTSV(raw);
+  allIssues = [];
+
+  for (const row of rows) {
+    const engTrim = row.english.trim();
+    const traTrim = row.translated.trim();
+
+    if (engTrim && traTrim && engTrim === traTrim) {
+      allIssues.push({
+        type: 'untranslated',
+        row: row.row,
+        qname: row.qname,
+        english: row.english,
+        translated: row.translated,
+        patternIssues: []
+      });
+      continue;
+    }
+
+    const patternIssues = [];
+    for (const pat of PATTERNS) {
+      const inEng = extractTokens(row.english, pat.re);
+      const inTra = extractTokens(row.translated, pat.re);
+      const { missing, extra } = multisetDiff(inEng, inTra);
+      if (missing.length || extra.length) {
+        patternIssues.push({ name: pat.name, missing, extra });
+      }
+    }
+
+    if (patternIssues.length) {
+      allIssues.push({
+        type: 'pattern',
+        row: row.row,
+        qname: row.qname,
+        english: row.english,
+        translated: row.translated,
+        patternIssues
+      });
+    }
+  }
+
+  activeFilter = 'all';
+  renderResults(rows.length);
+  document.getElementById('results').style.display = 'block';
+}
+
+function renderResults(total) {
+  const untrans = allIssues.filter(i => i.type === 'untranslated').length;
+  const pattern = allIssues.filter(i => i.type === 'pattern').length;
+  const clean = total - untrans - pattern;
+
+  // Metrics
+  document.getElementById('summary').innerHTML = `
+    <div class="metric">
+      <div class="metric-label">Rows checked</div>
+      <div class="metric-value">${total}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Clean</div>
+      <div class="metric-value ok">${clean}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Untranslated</div>
+      <div class="metric-value ${untrans > 0 ? 'bad' : 'ok'}">${untrans}</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Pattern issues</div>
+      <div class="metric-value ${pattern > 0 ? 'bad' : 'ok'}">${pattern}</div>
+    </div>
+  `;
+
+  // Filters
+  const filters = document.getElementById('filters');
+  filters.innerHTML = '';
+  if (allIssues.length > 0) {
+    [
+      ['all', `All issues (${allIssues.length})`],
+      ['untranslated', `Untranslated (${untrans})`],
+      ['pattern', `Pattern issues (${pattern})`]
+    ].forEach(([val, label]) => {
+      const b = document.createElement('button');
+      b.className = 'filter-btn' + (val === activeFilter ? ' active' : '');
+      b.textContent = label;
+      b.onclick = () => {
+        activeFilter = val;
+        document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        renderIssues();
+      };
+      filters.appendChild(b);
+    });
+  }
+
+  renderIssues();
+}
+
+function renderIssues() {
+  const list = document.getElementById('issues-list');
+  const filtered = activeFilter === 'all'
+    ? allIssues
+    : allIssues.filter(i => i.type === activeFilter);
+
+  if (allIssues.length === 0) {
+    list.innerHTML = `
+      <div class="all-ok">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 10.5l4.5 4.5 7.5-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        All ${document.getElementById('summary').querySelector('.metric-value').textContent} rows look clean — no issues found.
+      </div>`;
+    return;
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">No issues in this category.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((issue, idx) => {
+    const badge = issue.type === 'untranslated'
+      ? `<span class="badge badge-untrans">Untranslated</span>`
+      : `<span class="badge badge-pattern">Pattern</span>`;
+
+    const summaryText = issue.type === 'untranslated'
+      ? 'English and translated text are identical'
+      : issue.patternIssues.map(p => p.name).join(', ');
+
+    const bodyFields = `
+      <div class="field-grid">
+        <div class="field-row">
+          <div class="field-label">qname</div>
+          <div class="field-val">${esc(issue.qname)}</div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">English</div>
+          <div class="field-val">${esc(issue.english)}</div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Translated</div>
+          <div class="field-val">${esc(issue.translated)}</div>
+        </div>
+      </div>`;
+
+    const patternBody = issue.patternIssues.length ? `
+      <hr class="divider">
+      ${issue.patternIssues.map(pi => `
+        <div class="pattern-block">
+          <div class="pattern-name">${esc(pi.name)}</div>
+          <div class="token-row">
+            ${pi.missing.map(m => `<span class="token-label">missing</span><span class="token token-missing">${esc(m)}</span>`).join('')}
+            ${pi.extra.map(e => `<span class="token-label">added</span><span class="token token-added">${esc(e)}</span>`).join('')}
+          </div>
+        </div>`).join('')}
+    ` : '';
+
+    return `
+      <div class="issue" id="issue-${idx}">
+        <div class="issue-header" onclick="toggleIssue(${idx})">
+          <span class="row-num">row ${issue.row}</span>
+          ${badge}
+          <span class="issue-summary">${esc(summaryText)}</span>
+          <span class="issue-qname">${esc(issue.qname)}</span>
+          <span class="chevron">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <div class="issue-body">
+          ${bodyFields}
+          ${patternBody}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleIssue(idx) {
+  document.getElementById('issue-' + idx).classList.toggle('open');
+}
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('results').style.display = 'none';
+  allIssues = [];
+}
+
+function loadExample() {
+  document.getElementById('input').value = [
+    'qname\tenglish\ttranslated',
+    'Q1\tHow old are you?\tHow old are you?',
+    'Q2\t[pipe: name], where do you live?\t[pipe: naam], wo wohnst du?',
+    'Q3\t<b>Please select one:</b>\t<b>Bitte wähle eine aus:</b>',
+    'Q4\tHave you visited ${location} before?\tHast du ${location} schon besucht?',
+    'Q5\tSelect from [res Q1,resname] options\tWähle aus [res Q1,resname] Optionen',
+    'Q6\t<img src="[rel concept_1.png]"/> Rate this.\t<img src="[rel konzept_1.png]"/> Bewerte das.',
+    'Q7\t[loopvar: brand] product review\t[loopvar: brand] Produktbewertung',
+    'Q8\tTell us about yourself.\tTell us about yourself.',
+  ].join('\n');
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
