@@ -31,11 +31,16 @@
     ],
     "profiles": {
         "defaults": {
-            "colorScheme": "Quiet Light (Darker)"
+            "bellStyle": "window",
+            "colorScheme": "Gruvbox Light Hard"
         },
         "list": [
             {
                 "commandline": "pwsh.exe",
+                "elevate": false,
+                "font": {
+                    "face": "CaskaydiaCove Nerd Font"
+                },
                 "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
                 "hidden": false,
                 "name": "Windows PowerShell",
@@ -109,6 +114,29 @@
             "yellow": "#D79921"
         },
         {
+            "background": "#F9F5D7",
+            "black": "#3C3836",
+            "blue": "#458588",
+            "brightBlack": "#665C54",
+            "brightBlue": "#4587F0",
+            "brightCyan": "#8EC07C",
+            "brightGreen": "#B8BB26",
+            "brightPurple": "#D3869B",
+            "brightRed": "#FB4934",
+            "brightWhite": "#B8AB8B",
+            "brightYellow": "#98402E",
+            "cursorColor": "#FABD2F",
+            "cyan": "#689D6A",
+            "foreground": "#3C3836",
+            "green": "#98971A",
+            "name": "Gruvbox Light Hard",
+            "purple": "#B16286",
+            "red": "#CC241D",
+            "selectionBackground": "#CCE5FF",
+            "white": "#A89984",
+            "yellow": "#D79921"
+        },
+        {
             "background": "#282828",
             "black": "#282828",
             "blue": "#458588",
@@ -155,7 +183,7 @@
             "yellow": "#DAAA01"
         },
         {
-            "background": "#EBE3DA",
+            "background": "#F9F4ED",
             "black": "#000000",
             "blue": "#1B5596",
             "brightBlack": "#444444",

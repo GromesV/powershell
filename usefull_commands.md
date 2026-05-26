@@ -1,44 +1,49 @@
-# clipboard to json
-
-Clipboard content to file.
-`gcb > data.json`
-
-
-Get current path to clipboard. 
-`gl|scb`
-
-Get info for Alias.
-`alias gl`
-
-Save filen in folder to txt.file.
-`(gci).Name > dir.txt`
-
-Open file in default opener program, lets say for xlsx it will be ecxel, for txt n++
-
-`ii filename.txt`
-
-
-### Common Two-Letter Collisions
-If every "Get-C..." command used only two letters, the system would run out of unique shortcuts almost immediately. Here is how PowerShell differentiates other similar commands:
-
-| Full Command | Alias | Logic |
-| :--- | :--- | :--- |
-| `Get-Command` | **`gcm`** | **G**et **C**om**m**and |
-| `Get-Content` | **`gc`** | **G**et **C**ontent |
-| `Get-ChildItem` | **`gci`** | **G**et **C**hild**I**tem |
-| `Get-Credential` | **`gcred`** | **G**et **Cred**ential |
-| `Get-Culture` | **`gcul`** | **G**et **Cul**ture |
+Here is your PowerShell "Nuke & Navigate" cheat sheet, organized by function for quick scanning.
 
 ---
 
-### Discovering the "Why" on Your Own
-If you ever run into an alias that doesn't make sense, you can reverse-engineer it using `Get-Alias`. Since you're likely moving between different environments, you can run this to see the pattern:
+## 📋 Clipboard & Text
+| Task | Command |
+| :--- | :--- |
+| **Clip to File** | `gcb > data.json` |
+| **Path to Clip** | `gl \| scb` or `pwd \| scb` |
+| **Clean Clip** | `(gcb).Trim() \| scb` |
+| **Search Clip** | `gcb \| sls "search_term"` |
 
-```powershell
-Get-Alias gc, gcb, gci | Select-Object Name, Definition
-```
+## 📂 File & Directory Management
+| Task | Command |
+| :--- | :--- |
+| **List to File** | `(gci).Name > dir.txt` |
+| **Open File** | `ii filename.txt` (Uses default app) |
+| **Deep Mkdir** | `mkdir one/two/three` |
+| **Folder Size** | `gci -Rec -ErrorAction SilentlyContinue \| measure Length -s \| % { "{0:N2} MB" -f ($_.Sum / 1MB) }` |
+| **Top 10 Files** | `gci \| sort length -desc \| select -f 10` |
+| **Empty File** | `ni test.txt` |
 
-### Pro-Tip: Ambiguity in Naming
-PowerShell's built-in aliases were designed to avoid "clobbering" (overwriting) each other. If `Get-Clipboard` had taken `gc`, then `Get-Content`—which is arguably used much more frequently in automation—would have needed a longer, less convenient alias. 
+## 🌲 Smart Recursion (Avoiding `node_modules`)
+* **Standard Tree:**
+    `tree /f`
+* **Selective List (Excluding Junk):**
+    `gci -Recurse -Exclude "node_modules", ".git", "dist"`
+* **Folders Only:**
+    `gci -Directory -Recurse`
 
-By using **`gcb`**, the shell stays predictable: `gc` is for the file system (Content), and `gcb` is for the Clipboard.
+## 🛠️ System & Networking
+* **Check Alias:**
+    `alias gl`
+* **Port Check (e.g., 8080):**
+    `netstat -ano | findstr :8080`
+* **Public IP:**
+    `curl ifconfig.me`
+* **Tail Log:**
+    `gc file.log -Wait`
+* **Count Files:**
+    `(gci).Count`
+
+## ⚡ Process Control
+* **Force Kill by Name:**
+    `gps "chrome" | stop-process -f`
+* **Short Kill:**
+    `kill -n name`
+* **Command History:**
+    `h | select -last 10`
