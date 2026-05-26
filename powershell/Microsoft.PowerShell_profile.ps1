@@ -1,3 +1,33 @@
+
+
+
+# Terminal Icons
+Import-Module -Name Terminal-Icons
+
+Remove-Item Alias:ls  -Force -ErrorAction SilentlyContinue
+Remove-Item Alias:dir -Force -ErrorAction SilentlyContinue
+
+function ls
+{ eza --long --icons=auto          @args 
+}
+function ll
+{ eza --long --icons=auto --all    @args 
+}
+function la
+{ eza --icons=auto --all           @args 
+}
+function dir
+{ eza --long --icons=auto          @args 
+}
+function dirs
+{ eza --long --icons=auto          @args 
+}
+
+
+
+
+
+
 # ============================================================
 #  NAVIGATION
 # ============================================================
@@ -36,37 +66,37 @@ function gt-pajtoni
 }
 
 function gt-desktop
-{ Set-Location "C:\Users\VladimirGromes\Desktop" 
+{ Set-Location "C:\Users\VladimirGromes\Desktop"
 }
 function gt-onedrive
-{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC" 
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC"
 }
 function gt-projects
-{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\projects" 
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\projects"
 }
 function gt-dev
-{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev" 
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev"
 }
 function gt-git
-{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev\git" 
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\dev\git"
 }
 function gt-decipher
-{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\decipher" 
+{ Set-Location "C:\Users\VladimirGromes\OneDrive - Quadrant Strategies LLC\Work\decipher"
 }
 
 
 # open with n++
 function npp
-{ & "C:\Program Files\Notepad++\notepad++.exe" @args 
+{ & "C:\Program Files (x86)\Notepad++\notepad++.exe" @args
 }
 
 # Linux-style touch — creates file if it doesn't exist, updates timestamp if it does
 function touch ($file)
 {
     if (Test-Path $file)
-    { (Get-Item $file).LastWriteTime = Get-Date 
+    { (Get-Item $file).LastWriteTime = Get-Date
     } else
-    { New-Item -ItemType File -Path $file | Out-Null 
+    { New-Item -ItemType File -Path $file | Out-Null
     }
 }
 
@@ -80,9 +110,9 @@ function which ($cmd)
 function grep ($pattern, $path)
 {
     if ($path)
-    { Get-ChildItem $path -Recurse -File | Select-String -Pattern $pattern 
+    { Get-ChildItem $path -Recurse -File | Select-String -Pattern $pattern
     } else
-    { $input | Select-String -Pattern $pattern 
+    { $input | Select-String -Pattern $pattern
     }
 }
 
@@ -94,12 +124,12 @@ function findtext ($text)
 
 # here — open current folder in Explorer
 function here
-{ explorer . 
+{ explorer .
 }
 
 # editconf — open profile in Notepad
 function editconf
-{ code $PROFILE 
+{ code $PROFILE
 }
 
 # reload — re-source profile without restarting terminal
@@ -234,14 +264,14 @@ function prompt
 
     # Gather all pieces of the prompt
     $user  = if ($env:USERNAME)
-    { $env:USERNAME 
+    { $env:USERNAME
     } else
-    { $env:USER 
+    { $env:USER
     }       # works on Windows and Unix
     $hname = if ($env:COMPUTERNAME)
-    { $env:COMPUTERNAME 
+    { $env:COMPUTERNAME
     } else
-    { hostname 
+    { hostname
     } # works on Windows and Unix
     $path  = Get-ShortPath
     $git   = Get-GitBranch
@@ -252,9 +282,9 @@ function prompt
 
     # >> symbol: green on success, red on failure
     $symbol = if ($lastOk)
-    { "${C_OK}>>${RESET}" 
+    { "${C_OK}`$${RESET}"
     } else
-    { "${C_FAIL}>>${RESET}" 
+    { "${C_FAIL}`$${RESET}"
     }
 
     Write-Host ""        # blank line above prompt for visual breathing room
@@ -307,88 +337,8 @@ Set-Alias touch New-Item
 #    Edit the 38;5;N number in $C_FILE or $C_HIDDEN.
 # =============================================================================
 
-function Write-ColorDir
-{
-    param([string]$Path = ".")
 
-    $ESC = [char]27
 
-    # --- Optimized for Quiet Light ---
-    
-    # DIRECTORIES: White text on the Quiet Light Purple background (#705697)
-    # 38;2;255;255;255 = White Foreground
-    # 48;2;112;86;151   = Purple Background (matches your theme)
-    $C_DIR    = "$ESC[38;2;255;255;255m$ESC[48;2;112;86;151m"
-
-    # FILES: Dark Slate Grey (Deep contrast against light background)
-    $C_FILE   = "$ESC[38;5;236m" 
-
-    # HIDDEN: Light-Medium Grey (Dimmed but visible)
-    $C_HIDDEN = "$ESC[38;5;246m" 
-
-    # DATE: Muted Purple/Grey (Slightly lighter than foreground)
-    $C_DATE   = "$ESC[38;5;60m" 
-
-    # SIZE: Deep Teal (Adds a pop of color that is still dark)
-    $C_SIZE   = "$ESC[38;5;23m" 
-    
-    $RESET    = "$ESC[0m"
-
-    # -Force includes hidden files and system files in the listing
-    $items = Get-ChildItem -Path $Path -Force
-
-    foreach ($item in $items)
-    {
-        # Check the Hidden attribute bit using bitwise AND
-        $isHidden = $item.Attributes -band [System.IO.FileAttributes]::Hidden
-        $isDir    = $item.PSIsContainer   # true = directory, false = file
-
-        # Priority: hidden > directory > file
-        $nameColor = if ($isHidden)
-        { $C_HIDDEN 
-        } elseif ($isDir)
-        { $C_DIR 
-        } else
-        { $C_FILE 
-        }
-
-        $date = $item.LastWriteTime.ToString("yyyy-MM-dd HH:mm")
-
-        # Size: blank (7 spaces) for directories, human-readable for files
-        $size = if ($isDir)
-        { "       " 
-        } else
-        {
-            $b = $item.Length
-            if     ($b -ge 1GB)
-            { "{0,6:N1}G" -f ($b / 1GB) 
-            } elseif ($b -ge 1MB)
-            { "{0,6:N1}M" -f ($b / 1MB) 
-            } elseif ($b -ge 1KB)
-            { "{0,6:N1}K" -f ($b / 1KB) 
-            } else
-            { "{0,6}B"    -f $b 
-            }
-        }
-
-        # Print one row: date  size  name
-        Write-Host "$C_DATE$date$RESET  $C_SIZE$size$RESET  $nameColor$($item.Name)$RESET"
-    }
-}
-
-Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
-function dirs
-{ Write-ColorDir @args 
-}   # dirs → colored listing
-function ls
-{ Write-ColorDir @args 
-}   # ls   → colored listing
-Set-Alias ll Write-ColorDir              # ll   → colored listing
-
-Remove-Item Alias:dir -Force -ErrorAction SilentlyContinue
-function dir
-{ Write-ColorDir @args 
-}
 
 
 # =============================================================================
@@ -418,22 +368,7 @@ if ($prl)
     # Windows editing mode: Home/End/Ctrl+Left/Right work as expected
     Set-PSReadLineOption -EditMode Windows
 
-    # Syntax highlighting — works on all PSReadLine versions
-    try
-    {
-        Set-PSReadLineOption -Colors @{
-            Command = "`e[38;5;24m"    # Deep Navy Blue
-            Parameter = "`e[38;5;149m"   # lime       — -ParameterName flags
-            String    = "`e[38;5;221m"   # amber      — "quoted strings"
-            Number    = "`e[38;5;213m"   # pink       — numeric literals (42, 3.14)
-            Variable  = "`e[38;5;203m"   # coral      — $variables
-            Comment   = "`e[38;5;244m"   # grey       — # comments
-            Keyword   = "`e[38;5;141m"   # lavender   — if, foreach, function, return, etc.
-            Error     = "`e[38;5;196m"   # red        — syntax errors highlighted live
-        }
-    } catch
-    {
-    }
+
 
     # History prediction — requires PSReadLine 2.1+
     # Suggests completions based on previously typed commands
@@ -499,7 +434,7 @@ function Get-SurveyData
     $ZipFile = "$Survey.zip"
     $OutputDir = Split-Path -Parent $ZipFile
     if (-not $OutputDir)
-    { $OutputDir = "." 
+    { $OutputDir = "."
     }
 
     Write-Host "Fetching survey data from: $Url" -ForegroundColor Cyan
@@ -551,4 +486,54 @@ function Get-SurveyData
 #  Shown once when the terminal opens and the profile loads.
 #  Remove or edit this line if you don't want it.
 # =============================================================================
+Invoke-Expression (& { (zoxide init powershell | Out-String) })
+# Fix: manually fire zoxide hook on every prompt
+$global:__zoxide_prompt_old2 = $function:prompt
+function global:prompt
+{
+    $result = & $global:__zoxide_prompt_old2
+    $null = __zoxide_hook
+    return $result
+}
 
+# scoop install fd
+
+Set-PSReadLineKeyHandler -Key "Ctrl+f" -ScriptBlock {
+    $selected = fd --type d --hidden --exclude .git --exclude node_modules --exclude __pycache__ --exclude .venv --exclude venv --exclude dist --exclude build --exclude .next --exclude target |
+        fzf --height 40% --border --prompt "cd > "
+    if ($selected)
+    {
+        Set-Location $selected
+        [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+    }
+}
+
+Set-PSReadLineKeyHandler -Key "Ctrl+m" -ScriptBlock {
+    $selected = fd --type f --search-path "$env:USERPROFILE\Desktop" --search-path "$env:USERPROFILE\Downloads" |
+        fzf --height 40% --border --prompt "move > " --multi
+    if ($selected)
+    {
+        $selected | ForEach-Object { Move-Item $_ . }
+        Write-Host "Moved $($selected.Count) file(s) here" -ForegroundColor DarkGreen
+    }
+    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+}
+
+Set-PSReadLineKeyHandler -Key "Ctrl+u" -ScriptBlock {
+    $parents = @()
+    $current = Get-Item (Get-Location)
+    while ($current.Parent) {
+        $current = $current.Parent
+        $parents += $current.FullName
+    }
+    $selected = $parents | fzf --height 40% --border --prompt "up > "
+    if ($selected) {
+        Set-Location $selected
+        [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
+    }
+}
+
+
+function weather
+{ curl "wttr.in/?format=v2" 
+}
