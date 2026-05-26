@@ -108,6 +108,29 @@ The built-in `ls` and `dir` are replaced with `eza` for a cleaner output.
 | `editconf` | Opens the profile in VS Code |
 | `reload`   | Re-sources the profile without restarting the terminal |
 
+
+### Fuzzy keybindings (fzf + fd)
+
+| Keybind | What it does |
+|---------|-------------|
+| `Ctrl+F` | Fuzzy pick a subfolder and `cd` into it (skips `node_modules`, `__pycache__`, `.git`, etc.) |
+| `Ctrl+M` | Fuzzy pick files from Desktop and Downloads and move them to current folder. `Tab` to select multiple. |
+| `Ctrl+U` | Fuzzy pick a parent directory from the current path hierarchy to instantly navigate upwards (`cd ..` on steroids). |
+
+### Utility functions
+
+| Command | What it does |
+|---------|-------------|
+| `touch <file>` | Creates a file, or updates its timestamp if it exists |
+| `which <cmd>`  | Shows the full path to a command/executable |
+| `grep <pattern> [path]` | Searches text in files or piped input |
+| `findtext <text>` | Recursive content search from current directory |
+| `here`    | Opens current folder in Explorer |
+| `npp <file>` | Opens file in Notepad++ |
+| `editconf` | Opens the profile in VS Code |
+| `reload`   | Re-sources the profile without restarting the terminal |
+| `weather`  | Displays a rich, detailed v2 weather report via `wttr.in` |
+
 ### fd ignore rules
 Create a `.fdignore` file in your home directory to permanently exclude noisy folders from `fd` (and therefore `Ctrl+F`/`Ctrl+M`):
 
